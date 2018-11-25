@@ -5,8 +5,10 @@ var newMap;
  * Initialize map as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
+  //fetchRestaurantFromURL((error, restaurant) => {});
   initMap();
 });
+
 
 /**
  * Initialize leaflet map
@@ -80,8 +82,13 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
+
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
+
+  const resid = document.getElementById('restaurant-id');
+  resid.innerHTML = restaurant.id;
+  resid.value = restaurant.id;
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
@@ -98,8 +105,19 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
+
+  // DBHelper.fetchReviewsByRestaurantId(self.restaurant.id, (error, reviews) => {
+  //   console.log("reviews" + reviews);
+  //   // fill reviews
+  //   fillReviewsHTML(reviews);
+  // }); 
+  //var fetchedReviews = 
+  //DBHelper.fetchReviewsByRestaurantId(self.restaurant.id).then((fetchedReviews) => {
+    //console.log("reviews" + fetchedReviews);
+    // fill reviews
+    fillReviewsHTML();
+  //});
+
 }
 
 /**
@@ -125,23 +143,31 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews= self.restaurant.reviews) => {
+  //self.restaurant.reviews =reviews;
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
-  container.appendChild(ul);
+  //Fetch all reviews of a restaurant from server.
+  //fetchedReviews.then( (reviews) => {
+    console.log("rec reviews" + reviews);
+    //callback(null, reviews);
+    if (!reviews) {
+      const noReviews = document.createElement('p');
+      noReviews.innerHTML = 'No reviews yet!';
+      container.appendChild(noReviews);
+      return;
+    }
+    const ul = document.getElementById('reviews-list');
+    reviews.forEach(review => {
+      ul.appendChild(createReviewHTML(review));
+    });
+    container.appendChild(ul);
+    const btn = document.getElementById('new-review-button');
+    container.appendChild(btn);
+ // });
 }
 
 /**
@@ -154,7 +180,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toDateString();
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -192,4 +218,12 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+addNewReview = (review) => {
+  const container = document.getElementById('reviews-container');
+  const ul = document.getElementById('reviews-list');
+  ul.appendChild(createReviewHTML(review));
+  container.appendChild(ul);
 }

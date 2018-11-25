@@ -9,9 +9,12 @@ var markers = []
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   initMap(); // added 
+  //addReviewsToLocalDatabase();
+});
+window.addEventListener('load', (event)=> {
   fetchNeighborhoods();
   fetchCuisines();
-});
+})
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -185,7 +188,22 @@ createRestaurantHTML = (restaurant) => {
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more)
 
-  return li
+  const fav = document.createElement('span');
+  fav.className='favClass';
+  fav.id=`star_${restaurant.id}`
+  fav.innerHTML = '&#9733;';
+  fav.onclick= function(){
+    favoriteFunction(restaurant.id);
+  };
+  
+  if( typeof(restaurant.is_favorite)== "string")
+    restaurant.is_favorite = (restaurant.is_favorite == "true"? true: false);
+  
+  if (restaurant.is_favorite)
+    fav.className +=' yellowStar';
+  li.append(fav);
+
+  return li;
 }
 
 /**
@@ -215,3 +233,49 @@ addMarkersToMap = (restaurants = self.restaurants) => {
 } */
 
 //============ service worker ================//
+
+
+favoriteFunction = (restaurantId) => {
+  document.getElementById(`star_${restaurantId}`).classList.toggle('yellowStar');
+  DBHelper.fetchRestaurantById(restaurantId, (error, restaurant) => {
+    self.restaurant = restaurant;
+    if (!restaurant) {
+      console.error(error);
+      return;
+    }
+      
+    
+    DBHelper.markRestaurantAsFavorite(restaurant.id);
+    //callback(null, restaurant)
+  });
+
+  return false;
+}
+
+addReviewsToLocalDatabase = () => {
+  DBHelper.fetchRestaurants((error, restaurants) => {
+      //const restaurant = restaurants.find(r => r.id == id);
+      restaurants.forEach(restaurant => {
+        DBHelper.fetchReviewsByRestaurantId(restaurant.id).then((fetchedReviews) => {
+          console.log("reviews" + fetchedReviews);
+          var dbPromise = DBHelper.OpenLocalDatabase();
+          return dbPromise.then(function (db) {
+            if (!db) return;
+            
+            var tx = db.transaction('restaurantList', 'readwrite');
+            var store = tx.objectStore('restaurantList');
+            var req = store.get(restaurant.id).then( (restaurant) => {
+              restaurant.reviews = fetchedReviews;
+                var req2 = store.put(restaurant, restaurant.id).then( function() {
+                  console.log('Update successful');
+                });
+              });
+              return tx.complete;
+            });
+        });
+      })
+      
+  });
+
+  
+}
