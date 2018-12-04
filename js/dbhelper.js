@@ -325,7 +325,8 @@ static markRestaurantAsFavorite(restaurantID) {
         var req2 = store.put(restaurant, restaurantID).then( function() {
           console.log('Update successful');
         });
-        DBHelper.postRestaurantAsFavoriteOnServer(restaurant);
+        if( navigator.onLine)
+         DBHelper.postRestaurantAsFavoriteOnServer(restaurant);
         return tx.complete;
      });
   });

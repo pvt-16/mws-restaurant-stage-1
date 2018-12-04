@@ -1,4 +1,4 @@
-var staticCacheName = 'restaurants-v18';
+var staticCacheName = 'restaurants-v111';
 var contentImgsCache = 'restaurants-imgs';
 var allCaches = [
   staticCacheName,
@@ -22,7 +22,7 @@ self.addEventListener('install', function(event) {
         './css/images/marker-icon.png',
         './css/images/marker-shadow.png',
         './css/leaflet.min.css'
-      ]);
+      ]).then(self.skipWaiting())
     })
   );
 });
@@ -40,7 +40,15 @@ self.addEventListener('fetch', function(event) {
        return;
      }
   }
-
+  if(requestUrl.pathname === '/restaurant.html' && event.request.method == "GET" ){
+    var requestTemp = '/restaurant.html';
+    event.respondWith(
+      caches.match(requestTemp).then(function(response) {
+        return response || fetch(event.request);
+      })
+    );
+    return;
+  }
     
   if(requestUrl.pathname.startsWith('/restaurant') && requestUrl.method == "POST"){
       // event.respondWith(fetchRestaurantsFromLocalDatabase());
