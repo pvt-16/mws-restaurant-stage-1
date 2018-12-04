@@ -204,10 +204,20 @@ class DBHelper {
   }
     return idb.open('local-db2', 1, function(upgradeDb) {
       var keyValStore2 = upgradeDb.createObjectStore('restaurantList');
-    console.log('opened db');
+      var keyValStore4 = upgradeDb.createObjectStore('reviewsList');
+      
    });
  }
-    
+
+ static OpenLocalReviewsDatabase(callback) {
+  if (!navigator.serviceWorker) {
+     return Promise.resolve();
+  }
+     return idb.open('local-db2', 1, function(upgradeDb) {
+       var keyValStore2 = upgradeDb.createObjectStore('reviewsList');
+    });
+ }   
+
 static AddRestaurantsToLocalDatabase(restaurants) {
   if (!navigator.serviceWorker) {
     return Promise.resolve();
@@ -345,7 +355,7 @@ static markRestaurantAsFavorite(restaurantID) {
     })
   }
 
-  static addNewReviewOnServer(restaurant, review)
+  static addNewReviewOnServer(review)
   {
     fetch(DBHelper.DATABASE_URL_REVIEWS, {
       method: 'POST',
@@ -360,6 +370,19 @@ static markRestaurantAsFavorite(restaurantID) {
       if(response)
       console.log(response);
     })
+  }
+
+  static addRequestsToQueue(review) 
+  {
+    var dbPromise =  DBHelper.OpenLocalReviewsDatabase();
+    return dbPromise.then(function(db) {
+      if (!db) return;
+   
+        var tx = db.transaction('reviewsList', 'readwrite');
+        var store = tx.objectStore('reviewsList');
+        store.put(review, review.id);
+         return tx.complete;
+    });
   }
 }
 

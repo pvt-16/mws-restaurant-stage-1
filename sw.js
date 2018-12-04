@@ -22,7 +22,7 @@ self.addEventListener('install', function(event) {
         './css/images/marker-icon.png',
         './css/images/marker-shadow.png',
         './css/leaflet.min.css'
-      ]).then(self.skipWaiting())
+      ])
     })
   );
 });
@@ -32,7 +32,7 @@ self.addEventListener('fetch', function(event) {
  // console.log(requestUrl.pathname + " from sw");
   if (requestUrl.origin === location.origin) {
     if (requestUrl.pathname === '/') {
-      event.respondWith(caches.match('/skeleton'));
+      event.respondWith(caches.match('/'));
        return;
     }
      if (requestUrl.pathname.startsWith('/img/')) {
