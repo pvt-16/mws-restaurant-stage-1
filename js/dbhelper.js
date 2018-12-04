@@ -175,7 +175,7 @@ class DBHelper {
    */
   static imageUrlForRestaurant(restaurant) {
      if (restaurant.photograph!= undefined)
-      return (`/img/${restaurant.photograph}.jpg`);
+      return (`/img/${restaurant.photograph}.webp`);
     else
       return (`/img/undefined.jpg`);
   }
