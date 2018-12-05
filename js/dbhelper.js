@@ -204,7 +204,8 @@ class DBHelper {
   }
     return idb.open('local-db2', 1, function(upgradeDb) {
       var keyValStore2 = upgradeDb.createObjectStore('restaurantList');
-      var keyValStore4 = upgradeDb.createObjectStore('reviewsList');
+      var keyValStore4 = upgradeDb.createObjectStore('reviewsList', { keyPath: "tempId", autoIncrement:true });
+      keyValStore4.autoIn
       
    });
  }
@@ -382,6 +383,24 @@ static markRestaurantAsFavorite(restaurantID) {
         var store = tx.objectStore('reviewsList');
         store.put(review, review.id);
          return tx.complete;
+    });
+  }
+
+  static sendNewReviewsToServer() 
+  {
+    var dbPromise =  DBHelper.OpenLocalReviewsDatabase();
+    return dbPromise.then(function(db) {
+      if (!db) return;
+   
+        var tx = db.transaction('reviewsList', 'readwrite');
+        var store = tx.objectStore('reviewsList');
+        store.getAll().then(function(allreviews) {
+          allreviews.forEach(review => {
+            DBHelper.addNewReviewOnServer(review);
+            return;
+          })
+          return store.clear();
+        })
     });
   }
 }
