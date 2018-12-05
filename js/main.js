@@ -11,10 +11,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap(); // added 
   //addReviewsToLocalDatabase();
 });
+
 window.addEventListener('load', (event)=> {
   fetchNeighborhoods();
   fetchCuisines();
 })
+
+window.addEventListener('online', (event) => {
+  DBHelper.sendNewReviewsToServer();
+});
 
 /**
  * Fetch all neighborhoods and set their HTML.

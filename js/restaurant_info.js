@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
 });
 
+window.addEventListener('online', (event) => {
+  DBHelper.sendNewReviewsToServer();
+});
 
 /**
  * Initialize leaflet map
